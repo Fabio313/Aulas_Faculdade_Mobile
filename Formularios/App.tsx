@@ -12,7 +12,7 @@ export default function App() {
   const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!/\S+@\S+\.\S+/.test(email)) {
       Alert.alert('Erro', 'Por favor, insira um email válido.');
       return;
@@ -23,7 +23,34 @@ export default function App() {
       return;
     }
 
-    // Aqui você pode fazer algo com os dados do formulário
+    const userData = {
+      name,
+      email,
+      age: Number(age),
+      gender,
+      dateOfBirth: dateOfBirth ? dateOfBirth.toISOString().split('T')[0] : null, // Formato de data ISO
+    };
+  
+    try {
+      const response = await fetch("http://127.0.0.1:8000/users/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
+      });
+  
+      if (response.ok) {
+        Alert.alert("Sucesso", "Usuário cadastrado com sucesso!");
+      } else {
+        const data = await response.json();
+        Alert.alert("Erro", data.detail || "Erro ao cadastrar o usuário");
+      }
+    } catch (error) {
+      Alert.alert("Erro", "Não foi possível conectar ao servidor.");
+      console.error(error);
+    }
+    
     console.log({ name, email, age, gender, dateOfBirth });
   };
 
